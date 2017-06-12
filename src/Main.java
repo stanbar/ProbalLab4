@@ -1,58 +1,70 @@
 public class Main {
 
-    static double[][] results = new double[4][3];
-
     public static void main(String[] args) {
+        double[][] results = new double[3][4];
         double[] px = {0.3, 0.5, 0.2};
         double[] U1 = {1.0, 0.51, 0.4};
-        for (int i = 0; i < 3; i++) {
-            double prog = U1[i];
-            double wynik = 0;
-            double[] pu2u1pu2 = new double[3];
-            double[] pu1mpu2 = new double[3];
-            double suma = 0;
-            double pu2 = (double) 1 / 3; // tutaj dlatego że mamy 3 wartości jakby prawdopodobienstw, plus tak nam mówił na zajęciach
 
-            //Prawdopodobienstwo że P(x) znajdzie się w przedziale U1
-            for (int j = 0; j < 3; j++) {
-                pu2u1pu2[j] = px[j] / prog ; //tutaj chyba odliczamy to prawdopodobieństwo że U1 <= p(U1) czy  jakoś tak to było, sprawdź tam pod wynikami jest to napisane
-
-                pu2u1pu2[j] = Math.min(1,pu2u1pu2[j]); //Nie może być większe od 1
-                suma += pu2u1pu2[j]; // suma tego będzie potrzeba do obliczenia ogólnego prawdop... Czytaj 4 wypis, też sprawdź dokładnie
-            }
-
-            for (int j = 0; j < 3; j++) {
-                results[j][i] = pu2u1pu2[j] / suma;
-                // tutaj tak bo to warunkowe i tak jak w zadaniu chyba 2 trzeba dzielić przez prawdp ogólne, całościowe, czytaj chyba to było z bayesa
-            }
-
-            for (int j = 0; j < 3; j++) {
-                pu1mpu2[j] = pu2 * pu2u1pu2[j]; // tutaj średnio pamiętam bo to mówił na labce ale właśnie tu jest te prawdp razy 0,3333 bo mamy 3 dane
-                wynik += pu1mpu2[j]; // bo to było ogólne prawdopodobieństwo stąd suma
-            }
-            results[3][i] = wynik;
+        //For U1 inrange of [0,1]
+        //P(YES , U2 = i) = P(YES | U2 = i) * P(U2 = i) = px/1 * 1/3
+        double summ1 = 0;
+        for (int i = 0; i < px.length; i++) {
+            double probabilityOfYesAndX = calculatePTakForXEquals(px[i], U1[0]);
+            results[0][i] = probabilityOfYesAndX;
+            summ1 += probabilityOfYesAndX;
         }
-        printResults(px,U1);
+        //P(YES) = ∑P(YES , U2 = i)
+        results[0][3] = summ1;
+
+
+        //For U1 inrange of [0,0.51]
+        //P(YES , U2 = i) = P(YES | U2 = i) * P(U2 = i) = px/0.51 * 1/3
+        double summ2 = 0;
+        for (int i = 0; i < px.length; i++) {
+            double probabilityOfYesAndX = calculatePTakForXEquals(px[i], U1[1]);
+            results[1][i] = probabilityOfYesAndX;
+            summ2 += probabilityOfYesAndX;
+        }
+        //P(YES) = ∑P(YES , U2 = i)
+        results[1][3] = summ2;
+
+        //For U1 inrange of [0,0.4]
+        //P(YES , U2 = i) = P(YES | U2 = i) * P(U2 = i) = px/0.4 * 1/3
+        double summ3 = 0;
+        for (int i = 0; i < px.length; i++) {
+            double probabilityOfYesAndX = calculatePTakForXEquals(px[i], U1[2]);
+            results[2][i] = probabilityOfYesAndX;
+            summ3 += probabilityOfYesAndX;
+        }
+        //P(YES) = ∑P(YES , U2 = i)
+        results[2][3] = summ3;
+
+        printResults(results,px, U1);
     }
 
-    private static void printResults(double[] px, double[] U1) {
-        StringBuilder stringBuilder = new StringBuilder("     |");
-        for (int j = 0; j < 3; j++) {
-            stringBuilder.append(String.format("%.2f ",px[j]));
+    private static double calculatePTakForXEquals(double px, double range) {
+        return Math.min(1, px / range) * 1 / 3;
+    }
+
+    private static void printResults(double[][] results, double[] px, double[] U1) {
+        StringBuilder stringBuilder = new StringBuilder("      P(YES , X1 = U2i)");
+        stringBuilder.append("\n").append("**************************").append("\n").append("     |");
+        for (int j = 0; j < 4; j++) {
+            stringBuilder.append(j == 3 ? "P(YES)" : String.format("%.2f ", px[j]));
         }
         stringBuilder.append("\nU1\\U2|");
-        for (int j = 0; j < 3; j++) {
-            stringBuilder.append(String.format(" %d   ",j));
+        for (int j = 0; j < 4; j++) {
+            stringBuilder.append(j == 3 ? "    " :String.format(" %d   ", j));
         }
         stringBuilder.append("\n");
         for (int i = 0; i < 20; i++) {
             stringBuilder.append('-');
         }
         stringBuilder.append("\n");
-        for (int i = 0; i < 4; i++) {
-            stringBuilder.append(i == 3 ? "Wynik|":String.format("%.2f |",U1[i]));
-            for (int j = 0; j < 3; j++) {
-                stringBuilder.append(String.format("%.2f ",results[i][j]));
+        for (int i = 0; i < 3; i++) {
+            stringBuilder.append(String.format("%.2f |", U1[i]));
+            for (int j = 0; j < 4; j++) {
+                stringBuilder.append(String.format("%.2f ", results[i][j]));
             }
             stringBuilder.append("\n");
         }
